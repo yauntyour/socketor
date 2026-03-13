@@ -73,11 +73,18 @@ namespace servic
                                     if (ptr.expired())
                                     {
                                         buf = "HTTP/1.1 404 Not Found\r\n\r\n";
-                                    }
-                                    int err = ptr.lock()->func(header, buf);
-                                    if (err == rt::FLAG_ERROR)
+                                    }else
                                     {
-                                        buf = "HTTP/1.1 500 Internal Server Error\r\n\r\n";
+                                        auto locked_node = ptr.lock();
+                                        if (!locked_node) { 
+                                            buf = "HTTP/1.1 500 Internal Server Error\r\n\r\n";
+                                        } else {
+                                            int err = locked_node->func(header, buf);
+                                            if (err == rt::FLAG_ERROR)
+                                            {
+                                                buf = "HTTP/1.1 500 Internal Server Error\r\n\r\n";
+                                            }
+                                        }
                                     }
                                     self->socket.write_some(asio::buffer(buf));
                                     self->socket.close();

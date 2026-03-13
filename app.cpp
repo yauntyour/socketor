@@ -12,13 +12,13 @@ int main()
         asio::io_context io_context;
         servic::Server server(io_context, 8080, 300000);
 
-        ros.on("/", [](std::string &input, std::string &output)
+        ros.on("/", [](std::string &input, std::string &output) -> int
                {
             output = "HTTP/1.1 200 OK\r\n\r\nHello World!";
             return 0; });
-        ros.on("/test", [](std::string &input, std::string &output)
+        ros.on("/test", [](std::string &input, std::string &output) -> int
                {
-            output = "HTTP/1.1 200 OK\r\n\r\nHello World!";
+            output = "HTTP/1.1 200 OK\r\n\r\nTest.";
             return 0; });
 
         server.run(ros);
