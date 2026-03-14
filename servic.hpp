@@ -10,7 +10,7 @@
 #include <boost/asio/detached.hpp>
 #include <boost/asio/use_awaitable.hpp>
 
-#include "router.hpp"
+#include "router/router.hpp"
 
 namespace servic
 {
@@ -69,7 +69,7 @@ namespace servic
 
                                     std::string url = extract_url(header);
                                     std::string buf;
-                                    auto ptr = ros.get(url);
+                                    auto [ptr,params] = ros.get(url);
                                     if (ptr.expired())
                                     {
                                         buf = "HTTP/1.1 404 Not Found\r\n\r\n";
@@ -79,7 +79,7 @@ namespace servic
                                         if (!locked_node) { 
                                             buf = "HTTP/1.1 500 Internal Server Error\r\n\r\n";
                                         } else {
-                                            int err = locked_node->func(header, buf);
+                                            int err = locked_node->func(header, buf,params);
                                             if (err == rt::FLAG_ERROR)
                                             {
                                                 buf = "HTTP/1.1 500 Internal Server Error\r\n\r\n";

@@ -1,4 +1,4 @@
-#include "server.hpp"
+#include "servic.hpp"
 #include <boost/asio.hpp>
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/detached.hpp>
@@ -12,13 +12,15 @@ int main()
         asio::io_context io_context;
         servic::Server server(io_context, 8080, 300000);
 
-        ros.on("/", [](std::string &input, std::string &output) -> int
+        ros.on("/", [](std::string &input, std::string &output, const std::map<std::string, std::string> &params) -> int
                {
-            output = "HTTP/1.1 200 OK\r\n\r\nHello World!";
+            std::cout<<"root"<<std::endl;
+            output = "HTTP/1.1 200 OK\r\n\r\n Hello World!";
             return 0; });
-        ros.on("/test", [](std::string &input, std::string &output) -> int
+        ros.on("/test", [](std::string &input, std::string &output, const std::map<std::string, std::string> &params) -> int
                {
-            output = "HTTP/1.1 200 OK\r\n\r\nTest.";
+            std::cout<<"test"<<std::endl;
+            output = "HTTP/1.1 200 OK\r\n\r\n Test.";
             return 0; });
 
         server.run(ros);
