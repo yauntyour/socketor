@@ -68,6 +68,9 @@ namespace servic
                                     std::string header(asio::buffers_begin(data.data()),asio::buffers_end(data.data()));
 
                                     std::string url = extract_url(header);
+                                    std::cout << "New connection from: "
+                                            << self->socket.remote_endpoint().address().to_string()
+                                            << ":" << self->socket.remote_endpoint().port() <<" on: " << url << std::endl;
                                     std::string buf;
                                     auto [ptr,params] = ros.get(url);
                                     if (ptr.expired())
@@ -109,9 +112,6 @@ namespace servic
             while (true)
             {
                 asio::ip::tcp::socket socket = co_await acceptor.async_accept(asio::use_awaitable);
-                std::cout << "New connection from: "
-                          << socket.remote_endpoint().address().to_string()
-                          << ":" << socket.remote_endpoint().port() << std::endl;
                 co_spawn(socket.get_executor(), std::make_shared<Session>(std::move(socket), max_buf)->start(ros), asio::detached);
             }
         }
