@@ -97,7 +97,8 @@ namespace servic
                                     }else
                                     {
                                         size_t content_length = get_content_length(header);
-                                        if (content_length > 0)
+                                        size_t header_size = header.find("\r\n\r\n")+4;
+                                        if (content_length > 0 && header.size() < header_size + content_length)
                                         {
                                             asio::streambuf body(self->max_buf);
                                             co_await asio::async_read(self->socket,body, asio::transfer_exactly(content_length), asio::use_awaitable);
