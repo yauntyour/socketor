@@ -46,6 +46,24 @@ namespace servic
         // 解析失败（格式不对）
         return "";
     }
+
+    size_t get_content_length(const std::string &header)
+    {
+        std::string content_length_header = "Content-Length: ";
+        size_t pos = header.find(content_length_header);
+        if (pos != std::string::npos)
+        {
+            size_t start = pos + content_length_header.length();
+            size_t end = header.find("\r\n", start);
+            if (end != std::string::npos)
+            {
+                std::string content_length_str = header.substr(start, end - start);
+                return std::stoi(content_length_str);
+            }
+        }
+        return 0;
+    }
+
     namespace asio = boost::asio;
     class Session : public std::enable_shared_from_this<Session>
     {
@@ -78,6 +96,13 @@ namespace servic
                                         buf = "HTTP/1.1 404 Not Found\r\n\r\n";
                                     }else
                                     {
+                                        size_t content_length = get_content_length(header);
+                                        if (content_length > 0)
+                                        {
+                                            asio::streambuf body(self->max_buf);
+                                            co_await asio::async_read(self->socket,body, asio::transfer_exactly(content_length), asio::use_awaitable);
+                                            header.append(asio::buffers_begin(body.data()),asio::buffers_end(body.data()));
+                                        }
                                         auto locked_node = ptr.lock();
                                         if (!locked_node) { 
                                             buf = "HTTP/1.1 500 Internal Server Error\r\n\r\n";
